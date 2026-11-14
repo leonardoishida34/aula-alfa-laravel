@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -42,7 +43,13 @@ class UserController extends Controller
     ]);
 
     User::create($input);
-    return redirect()->route('admin.users.index');
+
+    if (Auth::check() && Auth::user()->profile?->type === 'admin') {
+        return redirect()->route('admin.users.index')
+            ->with('status', 'Usuário cadastrado com sucesso!');
+    }
+
+    return redirect('/login')->with('status', 'Cadastro realizado! Faça login.');
    }
 
    public function forgotPassword()
@@ -61,7 +68,7 @@ class UserController extends Controller
     $user->password = $input['password'];
     $user->save();
 
-    return redirect()->route('admin.users.index');
+    return redirect('/login')->with('status', 'Senha alterada! Faça login.');
    }
-
+   
 }
